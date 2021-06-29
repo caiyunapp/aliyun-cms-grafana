@@ -2,6 +2,7 @@
   "name": "CMS Grafana Service",
   "id": "aliyun_cms_grafana_datasource",
   "type": "datasource",
+  "alerting": true,
 
   "partials": {
     "config": "public/app/plugins/datasource/aliyun-cms-grafana/partials/config.html"
