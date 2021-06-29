@@ -58,7 +58,7 @@ func parseRequestParams(req *http.Request) (map[string]string, error) {
 	log.DefaultLogger.Debug("request_params: ", string(data))
 	_, hasAction := result["Action"]
 	if !hasAction {
-		return result, errors.New("Action parameter is missing")
+		return result, errors.New("action parameter is missing")
 	}
 	return result, nil
 }
@@ -68,8 +68,8 @@ func (ds *CmsDatasource) getDataSourceSetting(req *http.Request) (*instanceSetti
 
 	instance, err := ds.im.Get(pluginCxt)
 	if err != nil {
-		log.DefaultLogger.Info("Failed getting connection", "error", err)
-		return nil, errors.New("Failed getting connection")
+		log.DefaultLogger.Info("failed getting connection", "error", err)
+		return nil, errors.New("failed getting connection")
 	}
 	// create response struct
 	instSetting, ok := instance.(*instanceSettings)
@@ -77,13 +77,13 @@ func (ds *CmsDatasource) getDataSourceSetting(req *http.Request) (*instanceSetti
 
 	if !ok {
 		log.DefaultLogger.Info("Failed load setting connection !", "error", err)
-		return nil, errors.New("Failed getting connection")
+		return nil, errors.New("failed getting connection")
 	}
 	return instSetting, nil
 }
 
 func proxyListMetricMeta(instSetting *instanceSettings, params map[string]string, rw http.ResponseWriter) {
-	client, err := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
+	client, _ := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
 	request := cms.CreateDescribeMetricMetaListRequest()
 	request.Scheme = "https"
 	if project, ok := params["Project"]; ok {
@@ -115,7 +115,7 @@ func proxyListMetricMeta(instSetting *instanceSettings, params map[string]string
 }
 
 func proxyListProjectMeta(instSetting *instanceSettings, params map[string]string, rw http.ResponseWriter) {
-	client, err := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
+	client, _ := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
 	request := cms.CreateDescribeProjectMetaRequest()
 	request.Scheme = "https"
 	if pageSize, ok := params["PageSize"]; ok {
@@ -141,7 +141,7 @@ func proxyListProjectMeta(instSetting *instanceSettings, params map[string]strin
 }
 
 func proxyListMyGroups(instSetting *instanceSettings, params map[string]string, rw http.ResponseWriter) {
-	client, err := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
+	client, _ := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
 	request := cms.CreateDescribeMonitorGroupsRequest()
 	request.Scheme = "https"
 	if pageSize, ok := params["PageSize"]; ok {
@@ -176,24 +176,24 @@ func proxyListMyGroups(instSetting *instanceSettings, params map[string]string, 
 	}
 }
 
-func proxyAccessKeyGet(instSetting *instanceSettings, params map[string]string, rw http.ResponseWriter) {
-	client, err := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
-	request := cms.CreateDescribeMonitoringAgentAccessKeyRequest()
-	request.Scheme = "https"
+// func proxyAccessKeyGet(instSetting *instanceSettings, params map[string]string, rw http.ResponseWriter) {
+// 	client, _ := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
+// 	request := cms.CreateDescribeMonitoringAgentAccessKeyRequest()
+// 	request.Scheme = "https"
 
-	response, err := client.DescribeMonitoringAgentAccessKey(request)
-	if err != nil {
-		log.DefaultLogger.Error(err.Error())
-		handleResponse(rw, nil, err)
-	} else {
-		data, err := json.Marshal(response)
-		log.DefaultLogger.Debug(string(data))
-		handleResponse(rw, data, err)
-	}
-}
+// 	response, err := client.DescribeMonitoringAgentAccessKey(request)
+// 	if err != nil {
+// 		log.DefaultLogger.Error(err.Error())
+// 		handleResponse(rw, nil, err)
+// 	} else {
+// 		data, err := json.Marshal(response)
+// 		log.DefaultLogger.Debug(string(data))
+// 		handleResponse(rw, data, err)
+// 	}
+// }
 
 func proxyQueryMetricData(instSetting *instanceSettings, params map[string]string, rw http.ResponseWriter) {
-	client, err := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
+	client, _ := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
 	request := cms.CreateDescribeMetricListRequest()
 	request.Scheme = "https"
 	if project, ok := params["Project"]; ok {
@@ -240,7 +240,7 @@ func proxyQueryMetricData(instSetting *instanceSettings, params map[string]strin
 }
 
 func proxyQueryMetricLast(instSetting *instanceSettings, params map[string]string, rw http.ResponseWriter) {
-	client, err := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
+	client, _ := cms.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
 	request := cms.CreateDescribeMetricLastRequest()
 	request.Scheme = "https"
 
@@ -288,17 +288,13 @@ func proxyQueryMetricLast(instSetting *instanceSettings, params map[string]strin
 }
 
 func proxyRdsDescribeTags(instSetting *instanceSettings, params map[string]string, rw http.ResponseWriter) {
-	client, err := rds.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
+	client, _ := rds.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
 
 	request := rds.CreateDescribeTagsRequest()
 	request.Scheme = "https"
 
 	if regionID, ok := params["RegionId"]; ok {
 		request.RegionId = regionID
-	}
-
-	if tags, ok := params["Tags"]; ok {
-		request.Tags = tags
 	}
 
 	if tags, ok := params["Tags"]; ok {
@@ -321,7 +317,7 @@ func proxyRdsDescribeTags(instSetting *instanceSettings, params map[string]strin
 }
 
 func proxyRdsListTagResources(instSetting *instanceSettings, params map[string]string, rw http.ResponseWriter) {
-	client, err := rds.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
+	client, _ := rds.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
 
 	request := rds.CreateListTagResourcesRequest()
 	request.Scheme = "https"
@@ -387,7 +383,7 @@ func proxyRdsListTagResources(instSetting *instanceSettings, params map[string]s
 }
 
 func proxyEcsDescribeTags(instSetting *instanceSettings, params map[string]string, rw http.ResponseWriter) {
-	client, err := ecs.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
+	client, _ := ecs.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
 
 	request := ecs.CreateDescribeTagsRequest()
 	request.Scheme = "https"
@@ -459,7 +455,7 @@ func proxyEcsDescribeTags(instSetting *instanceSettings, params map[string]strin
 }
 
 func proxyEcsListTagResources(instSetting *instanceSettings, params map[string]string, rw http.ResponseWriter) {
-	client, err := ecs.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
+	client, _ := ecs.NewClientWithAccessKey("cn-hangzhou", instSetting.accessKey, instSetting.accessSecret)
 
 	request := ecs.CreateListTagResourcesRequest()
 	request.Scheme = "https"
@@ -569,19 +565,19 @@ func (ds *CmsDatasource) ProxyCmsPopApi(rw http.ResponseWriter, req *http.Reques
 	switch params["Action"] {
 	case "QueryMetricLast":
 		proxyQueryMetricLast(instSetting, params, rw)
-		break
+		return
 	case "QueryMetricList":
 		proxyQueryMetricData(instSetting, params, rw)
-		break
+		return
 	case "QueryMetricMeta":
 		proxyListMetricMeta(instSetting, params, rw)
-		break
+		return
 	case "QueryProjectMeta":
 		proxyListProjectMeta(instSetting, params, rw)
-		break
+		return
 	case "ListMyGroups":
 		proxyListMyGroups(instSetting, params, rw)
-		break
+		return
 		//disable for security reason
 		// case "AccessKeyGet":
 		// 	proxyAccessKeyGet(instSetting, params, rw)
@@ -606,10 +602,10 @@ func (ds *CmsDatasource) ProxyEcsPopApi(rw http.ResponseWriter, req *http.Reques
 	switch params["Action"] {
 	case "DescribeTags":
 		proxyEcsDescribeTags(instSetting, params, rw)
-		break
+		return
 	case "ListTagResources":
 		proxyEcsListTagResources(instSetting, params, rw)
-		break
+		return
 	}
 }
 
@@ -630,10 +626,10 @@ func (ds *CmsDatasource) ProxyRdsPopApi(rw http.ResponseWriter, req *http.Reques
 	switch params["Action"] {
 	case "DescribeTags":
 		proxyRdsDescribeTags(instSetting, params, rw)
-		break
+		return
 	case "ListTagResources":
 		proxyRdsListTagResources(instSetting, params, rw)
-		break
+		return
 	}
 }
 
@@ -650,15 +646,15 @@ func (td *CmsDatasource) CheckHealth(ctx context.Context, req *backend.CheckHeal
 
 type instanceSettings struct {
 	endpoint     string
-	name         string
 	accessKey    string
 	accessSecret string
+	// name         string
 }
 
 func newDataSourceInstance(setting backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
-	type editModel struct {
-		Host string `json:"host"`
-	}
+	// type editModel struct {
+	// 	Host string `json:"host"`
+	// }
 
 	log.DefaultLogger.Debug("newDataSourceInstance ak: ", setting.DecryptedSecureJSONData["cmsAccessKey"]+"/"+setting.DecryptedSecureJSONData["cmsSecretKey"])
 
